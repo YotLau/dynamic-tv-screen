@@ -33,7 +33,7 @@ def generate_image_hf():
             randomize_seed=True,
             width=2048,
             height=1152,
-            num_inference_steps=10,
+            num_inference_steps=4,
             api_name="/infer"
         )
         # Expecting result as a tuple with the temporary image path as the first element.
@@ -110,34 +110,7 @@ def fetch_image(temp_image_path, save_folder):
     print("Image saved locally at:", destination_path)
     return destination_path
 
-# -------------------------------
-# Step 3: Push the Image to the Samsung Frame TV
-# -------------------------------
-from samsungtvws import SamsungTVWS
 
-# Replace with your TV's local IP address.
-TV_IP = os.getenv("TV_IP")  # Update with your actual TV IP
-
-def push_image_to_tv(image_path):
-    """
-    Reads the saved image file and pushes it to the Samsung Frame TV.
-    """
-    try:
-        tv = SamsungTVWS(host=TV_IP)
-        art = tv.art()
-        with open(image_path, "rb") as image_file:
-            image_data = image_file.read()
-        print(f"Uploading image '{image_path}' to Samsung Frame TV...")
-        response = art.upload(
-            image_data,
-            file_type="JPEG",          # Ensure this matches your image format.
-            matte="modern_polar"    # Adjust matte style if desired.
-        )
-        print("Upload successful!")
-        print("TV Response:", response)
-        tv.art().select_image(response)
-    except Exception as e:
-        print("Error during upload:", e)
 
 # -------------------------------
 # Main Execution Flow
@@ -153,13 +126,13 @@ def main():
             temp_image_path = generate_image_openai()
         
         # Define the folder where images should be stored.
-        save_folder = os.env('IMAGES_FOLDER')
+        save_folder = os.getenv('IMAGES_FOLDER')
         
         # Copy the generated image to your designated folder.
         saved_image_path = fetch_image(temp_image_path, save_folder)
         
         # Upload the saved image to your Samsung Frame TV.
-        push_image_to_tv(saved_image_path)
+       # push_image_to_tv(saved_image_path)
         
         print("Process completed successfully!")
     except Exception as e:
