@@ -16,9 +16,13 @@ load_dotenv()
 # Hugging Face Generation via gradio_client
 from gradio_client import Client
 
-# Initialize the Hugging Face client (update the Space name if needed)
-client = Client("stabilityai/stable-diffusion-3.5-large-turbo")
-MainPrompt = os.getenv('PROMPT')  # Change prompt if desired.
+# Load environment variables for the HF space and prompts
+HF_SPACE = os.getenv("HF_SPACE")
+MainPrompt = os.getenv("PROMPT")            # e.g., "a beautiful sunset, hyper realism"
+NegativePrompt = os.getenv("NEGATIVE_PROMPT")  # e.g., "low quality, blurry"
+
+# Initialize the Hugging Face client using the environment variable
+client = Client(HF_SPACE)
 
 def generate_image_hf():
     """
@@ -28,12 +32,12 @@ def generate_image_hf():
     try:
         result = client.predict(
             prompt=MainPrompt, 
-            negative_prompt="bla bla",
+            negative_prompt=NegativePrompt,
             seed=0,
             randomize_seed=True,
-            width=2048,
-            height=1152,
-            num_inference_steps=4,
+            width=1792,
+            height=1024,
+            num_inference_steps=5,
             api_name="/infer"
         )
         # Expecting result as a tuple with the temporary image path as the first element.
