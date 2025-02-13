@@ -45,7 +45,7 @@ def generate_image_openai():
     Returns the temporary image path.
     """
     # --- PLACEHOLDER: Insert your OpenAI API token below ---
-    OPENAI_API_KEY = "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"  # Replace with your actual OpenAI API key
+    OPENAI_API_KEY = ""  # Replace with your actual OpenAI API key
 
     url = "https://api.openai.com/v1/images/generations"
     headers = {
