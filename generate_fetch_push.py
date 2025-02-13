@@ -2,8 +2,12 @@
 import os
 import shutil
 from datetime import datetime
+from dotenv import load_dotenv
 import tempfile
 import requests
+
+# Load variables from .env file
+load_dotenv()
 
 # -------------------------------
 # Step 1: Image Generation Functions
@@ -45,7 +49,7 @@ def generate_image_openai():
     Returns the temporary image path.
     """
     # --- PLACEHOLDER: Insert your OpenAI API token below ---
-    OPENAI_API_KEY = ""  # Replace with your actual OpenAI API key
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")  # Replace with your actual OpenAI API key
 
     url = "https://api.openai.com/v1/images/generations"
     headers = {
@@ -112,7 +116,7 @@ def fetch_image(temp_image_path, save_folder):
 from samsungtvws import SamsungTVWS
 
 # Replace with your TV's local IP address.
-TV_IP = "192.168.1.225"  # Update with your actual TV IP
+TV_IP = os.getenv("TV_IP")  # Update with your actual TV IP
 
 def push_image_to_tv(image_path):
     """
