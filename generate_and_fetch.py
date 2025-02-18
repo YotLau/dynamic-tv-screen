@@ -19,6 +19,9 @@ result = client.predict(
 )
 print("API Response:", result)
 
+
+
+
 # The API returns a tuple; the first element is the path to the generated image.
 temp_image_path = result[0]
 print("Temporary image path:", temp_image_path)

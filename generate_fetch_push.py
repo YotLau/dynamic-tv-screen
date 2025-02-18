@@ -9,6 +9,10 @@ import requests
 # Load variables from .env file
 load_dotenv()
 
+# Constants
+NEGATIVE_PROMPT = "ugly, blurry, low quality, distorted, deformed"
+MainPrompt = os.getenv('PROMPT')  # Change prompt if desired.
+
 # -------------------------------
 # Step 1: Image Generation Functions
 # -------------------------------
@@ -17,31 +21,55 @@ load_dotenv()
 from gradio_client import Client
 
 # Initialize the Hugging Face client (update the Space name if needed)
-client = Client("stabilityai/stable-diffusion-3.5-large-turbo")
-MainPrompt = os.getenv('PROMPT')  # Change prompt if desired.
+client = Client(os.getenv('IDEOGRAM_ENDPOINT'))
 
-def generate_image_hf():
+def generate_image_ideogram():
     """
-    Generates an image using the Hugging Face Space API.
+    Generates an image using the Ideogram API.
     Returns the temporary image path.
     """
     try:
-        result = client.predict(
-            prompt=MainPrompt, 
-            negative_prompt="bla bla",
-            seed=0,
-            randomize_seed=True,
-            width=2048,
-            height=1152,
-            num_inference_steps=10,
-            api_name="/infer"
+        response = requests.post(
+            "https://api.ideogram.ai/generate",
+            headers={
+                "Api-Key": os.getenv('IDEOGRAM_API_KEY'),
+                "Content-Type": "application/json"
+            },
+            json={
+                "image_request": {
+                    "prompt": os.getenv('PROMPT'),
+                    "model": os.getenv('IDEOGRAM_MODEL'),
+                    "magic_prompt_option": "AUTO",
+                    "negative_prompt": os.getenv('NEGATIVE_PROMPT'),
+                    "style_type": os.getenv('IDEOGRAM_STYLE_TYPE'),
+                    "resolution": os.getenv('IDEOGRAM_RESOLUTION'),
+                    "aspect_ratio": os.getenv('IDEOGRAM_ASPECT_RATIO')
+                }
+            },
         )
-        # Expecting result as a tuple with the temporary image path as the first element.
-        temp_image_path = result[0]
-        print("Hugging Face generated temporary image path:", temp_image_path)
+        
+        if response.status_code != 200:
+            raise Exception(f"Ideogram API request failed with status code: {response.status_code}, response: {response.text}")
+        
+        result = response.json()
+        image_url = result.get("image_url")  # Adjust this based on actual API response structure
+        if not image_url:
+            raise Exception("Ideogram API response does not contain an image URL.")
+        
+        print("Ideogram generated image URL:", image_url)
+        
+        # Download the image and save it temporarily
+        temp_dir = tempfile.gettempdir()
+        temp_image_path = os.path.join(temp_dir, "ideogram_generated_image.webp")
+        r = requests.get(image_url)
+        if r.status_code != 200:
+            raise Exception(f"Failed to download image from Ideogram. Status code: {r.status_code}")
+        with open(temp_image_path, "wb") as f:
+            f.write(r.content)
+        print("Ideogram image saved temporarily at:", temp_image_path)
         return temp_image_path
     except Exception as e:
-        raise Exception("Hugging Face generation failed: " + str(e))
+        raise Exception("Ideogram generation failed: " + str(e))
 
 def generate_image_openai():
     """
@@ -144,16 +172,11 @@ def push_image_to_tv(image_path):
 # -------------------------------
 def main():
     try:
-        # Try generating the image using Hugging Face API first.
-        try:
-            temp_image_path = generate_image_hf()
-        except Exception as hf_error:
-            print("Hugging Face generation failed:", hf_error)
-            print("Falling back to OpenAI image generation...")
-            temp_image_path = generate_image_openai()
+        # Generate image using Ideogram API
+        temp_image_path = generate_image_ideogram()
         
         # Define the folder where images should be stored.
-        save_folder = os.env('IMAGES_FOLDER')
+        save_folder = os.getenv('IMAGES_FOLDER')  # Fixed typo from os.env to os.getenv
         
         # Copy the generated image to your designated folder.
         saved_image_path = fetch_image(temp_image_path, save_folder)
