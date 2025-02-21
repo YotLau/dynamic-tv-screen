@@ -48,9 +48,9 @@ def combine_images(logo_path, background_path, output_path):
 # Example usage
 if __name__ == "__main__":
     logo_path = r"C:\Users\Yotam Laufman\Desktop\yozmalogoonoback.PNG"
-    background_path = r"C:\Projects\FrameTVAutomation\Images\generated_image_20250216_142253.webp"
+    background_path = r"C:\Projects\FrameTVAutomation\Images\generated_image_20250219_152646.webp"
     output_path = r"C:\Users\Yotam Laufman\Desktop\combined.jpg"
     
     combine_images(r"C:\Users\Yotam Laufman\Desktop\yozmalogoonoback.PNG", 
-                   r"C:\Projects\FrameTVAutomation\Images\generated_image_20250216_142253.webp", 
+                   r"C:\Projects\FrameTVAutomation\Images\generated_image_20250219_152646.webp", 
                    r"C:\Users\Yotam Laufman\Desktop\combined.jpg")
