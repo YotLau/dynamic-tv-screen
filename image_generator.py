@@ -9,10 +9,20 @@ NEGATIVE_PROMPT = "ugly, blurry, low quality, distorted, deformed"
 
 def get_random_prompt():
     generator = PromptGenerator()
-    return generator.generate_prompt() or "A beautiful digital artwork with vibrant colors and dynamic composition"
+    prompt = generator.generate_prompt()
+    if not prompt:
+        print("Failed to generate prompt. Stopping process.")
+        return None
+    return prompt
 
 def generate_image_api():
     try:
+        prompt = get_random_prompt()
+        if not prompt:
+            return None
+            
+        print(f"Using prompt: {prompt}")  # Debug line to show the prompt being used
+        
         response = requests.post(
             "https://api.ideogram.ai/generate",
             headers={
@@ -21,7 +31,7 @@ def generate_image_api():
             },
             json={
                 "image_request": {
-                    "prompt": get_random_prompt(),
+                    "prompt": prompt,
                     "model": os.getenv('IDEOGRAM_MODEL'),
                     "magic_prompt_option": "AUTO",
                     "negative_prompt": os.getenv('NEGATIVE_PROMPT'),

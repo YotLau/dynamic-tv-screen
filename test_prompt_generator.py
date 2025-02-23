@@ -1,6 +1,7 @@
 import os
 import requests
 from dotenv import load_dotenv  # Added for .env file support
+from prompt_generator import PromptGenerator
 
 # Load environment variables
 load_dotenv()
@@ -30,11 +31,15 @@ class PromptGenerator:
                     "messages": [
                         {
                             "role": "system",
-                            "content": "You are a wallpaper specialist and artist, look at this list of possible wallpaper prompts. Provide one of your own that keeps the essence of the original prompts in terms of realistic and artistic photography. Provide only the prompt itself without any intro at all."
+                            "content": "You are an expert wallpaper artist specializing in realistic and artistic photography. Using the reference prompts provided, generate a single, concise wallpaper prompt that captures the same essence and visual richness. Respond with only the prompt text—do not include any introductions, explanations, or extra commentary."
                         },
                         {
                             "role": "user",
-                            "content": ' '.join(prompts)
+                            "content": "Generate a new wallpaper prompt based on these references:"
+                        },
+                        {
+                            "role": "user",
+                            "content": prompts
                         }
                     ]
                 }
@@ -52,29 +57,39 @@ class PromptGenerator:
             print(f"Error occurred: {str(e)}")
             return None 
 
-# Test code
-if __name__ == "__main__":
-    # Example environment variables (you should put these in a .env file)
-    test_prompts = [
-        "A serene mountain landscape at sunset",
-        "Abstract geometric patterns in pastel colors",
-        "Coastal waves crashing against rocky cliffs",
-        "Dense forest in morning mist",
-        "Urban nightscape with neon lights",
-        "Minimalist Japanese garden",
-        "Desert dunes at golden hour",
-        "Crystal formations in vivid colors"
-    ]
+def test_prompt_generation():
+    # Load environment variables
+    load_dotenv()
     
-    # Set test environment variables (now using range 1-9)
-    for i, prompt in enumerate(test_prompts, 1):
-        os.environ[f'PROMPT_{i}'] = prompt
+    # Print environment variables for debugging
+    print("\nChecking environment variables:")
+    print(f"OPENROUTER_API_KEY exists: {'Yes' if os.getenv('OPENROUTER_API_KEY') else 'No'}")
+    print(f"OPENROUTER_MODEL: {os.getenv('OPENROUTER_MODEL')}")
+    print(f"OPENROUTER_ENDPOINT: {os.getenv('OPENROUTER_ENDPOINT')}")
     
-    # Create and test the generator
+    # Print available prompts
+    print("\nAvailable prompts:")
+    for i in range(1, 5):
+        prompt = os.getenv(f'PROMPT_{i}')
+        if prompt:
+            print(f"PROMPT_{i}: {prompt[:50]}...")
+    
+    print("\nTesting prompt generation:")
+    # Create generator instance
     generator = PromptGenerator()
+    
+    # Try to generate a prompt
     result = generator.generate_prompt()
     
+    # Check the result
     if result:
-        print("Test successful!")
+        print("\n=== Success! ===")
+        print("Generated prompt:", result)
+        return True
     else:
-        print("Test failed - no prompt generated") 
+        print("\n=== Failed ===")
+        print("Could not generate prompt. Check the error messages above.")
+        return False
+
+if __name__ == "__main__":
+    test_prompt_generation() 

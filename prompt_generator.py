@@ -9,45 +9,64 @@ class PromptGenerator:
 
         
     def generate_prompt(self):
-        # Check for required environment variables
-        required_vars = ['OPENROUTER_API_KEY', 'OPENROUTER_MODEL']
-        missing_vars = [var for var in required_vars if not os.getenv(var)]
-        
-        if missing_vars:
-            print(f"Error: Missing required environment variables: {', '.join(missing_vars)}")
-            return None
-
-        prompts = [os.getenv(f'PROMPT_{i}') for i in range(1, 9) if os.getenv(f'PROMPT_{i}')]
-        
         try:
+            # Check for required environment variables
+            required_vars = ['OPENROUTER_API_KEY', 'OPENROUTER_MODEL', 'OPENROUTER_ENDPOINT']
+            missing_vars = [var for var in required_vars if not os.getenv(var)]
+            
+            if missing_vars:
+                print(f"Error: Missing required environment variables: {', '.join(missing_vars)}")
+                return None
+
+            prompts = [os.getenv(f'PROMPT_{i}') for i in range(1, 5) if os.getenv(f'PROMPT_{i}')]
+            print(f"Found {len(prompts)} prompts")
+            
+            endpoint = os.getenv('OPENROUTER_ENDPOINT')
+            api_key = os.getenv('OPENROUTER_API_KEY')
+            model = os.getenv('OPENROUTER_MODEL')
+            
+            print(f"Making request to: {endpoint}")
+            print(f"Using model: {model}")
+            
             response = requests.post(
-                os.getenv('OPENROUTER_ENDPOINT'),
+                endpoint,
                 headers={
-                    "Authorization": "Bearer " + os.getenv('OPENROUTER_API_KEY'),
-                    "Content-Type": "application/json"
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://github.com/",
+                    "X-Title": "Wallpaper Generator"
                 },
                 json={
-                    "model": os.getenv('OPENROUTER_MODEL'),
+                    "model": model,
                     "messages": [
                         {
-                            "role": "system",
-                            "content": "You are a wallpaper specialist and artist, look at this list of possible wallpaper prompts. Provide one of your own that keeps the essence of the original prompts in terms of realistic and artistic photography. Provide only the prompt itself without any intro at all."
-                        },
-                        {
                             "role": "user",
-                            "content": ' '.join(prompts)
+                            "content": "You are a wallpaper specialist and artist. Generate a new wallpaper prompt that keeps the essence of of realistic and artistic photography made with a professional camera capturing a beautiful and picturesque scene or landscape. Provide only the prompt itself without any intro or explanations. here's a list of prompts to get inspired from: "+
+                            "8. A sprawling sunflower field stretching towards the horizon under a bright, clear blue sky. The golden petals of the sunflowers bask in the sunlight, creating a joyful ambiance. Captured in high-resolution photograph, from an elevated viewpoint showcasing the entire field."
                         }
                     ]
                 }
             )
-            response.raise_for_status()
-            data = response.json()
-            content = data.get('choices', [{}])[0].get('message', {}).get('content')
-            print(f"\nRaw content: {content}")
-            prompt = content.strip() if content else None
-            if prompt:
-                print(f"\nGenerated prompt: {prompt}\n")
-            return prompt
+            
+            if response.status_code != 200:
+                print(f"Error response (Status {response.status_code}): {response.text}")
+                return None
                 
-        except Exception:
+            data = response.json()
+            print(f"API Response: {data}")
+            
+            if not data or 'choices' not in data:
+                print("Invalid response format from API")
+                return None
+                
+            content = data['choices'][0]['message']['content'].strip()
+            if content:
+                print(f"\nGenerated prompt: {content}\n")
+                return content
+            else:
+                print("No content in API response")
+                return None
+                
+        except Exception as e:
+            print(f"Exception in generate_prompt: {str(e)}")
             return None 
