@@ -1,34 +1,45 @@
 #!/usr/bin/env python3
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+from config import Config
+from logger import setup_logger
 from image_generator import generate_image_api
 from image_fetcher import fetch_image
 from tv_pusher import push_image_to_tv
 
+logger = setup_logger()
+
 def main():
     try:
-        # Verify required environment variables
-        required_vars = ['OPENROUTER_API_KEY', 'OPENROUTER_MODEL', 'IMAGES_FOLDER']
-        missing_vars = [var for var in required_vars if not os.getenv(var)]
-        if missing_vars:
-            raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
-            
+        # Validate environment
+        Config.validate_env()
+        
         # Generate and process image
         temp_image_path = generate_image_api()
         if not temp_image_path or not os.path.exists(temp_image_path):
+            logger.error("Failed to generate image")
             return
             
-        print(f"Image generated successfully at: {temp_image_path}")
-        print(f"Saving to folder: {os.getenv('IMAGES_FOLDER')}")
+        logger.info(f"Image generated successfully at: {temp_image_path}")
+        logger.info(f"Saving to folder: {Config.get_env('IMAGES_FOLDER')}")
         
-        saved_image_path = fetch_image(temp_image_path, os.getenv('IMAGES_FOLDER'))
-        push_image_to_tv(saved_image_path)
-        
-        print("Process completed successfully!")
-        
+        try:
+            saved_image_path = fetch_image(temp_image_path, Config.get_env('IMAGES_FOLDER'))
+            push_image_to_tv(saved_image_path)
+            
+            # Cleanup temporary file
+            os.remove(temp_image_path)
+            logger.info("Temporary file cleaned up")
+            
+            logger.info("Process completed successfully!")
+            
+        finally:
+            # Ensure temp file cleanup even if TV push fails
+            if os.path.exists(temp_image_path):
+                os.remove(temp_image_path)
+                
     except Exception as e:
-        print(f"Error: {str(e)}")
+        logger.error(f"Error: {str(e)}", exc_info=True)
 
 if __name__ == "__main__":
-    main() 
+    main()
