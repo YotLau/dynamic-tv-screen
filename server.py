@@ -2,6 +2,7 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
+from tkinter import Tk, filedialog
 from config import Config
 from logger import setup_logger
 from image_generator import generate_image_api
@@ -22,6 +23,44 @@ def serve_image(filename):
         return send_from_directory(images_folder, filename)
     except Exception as e:
         logger.error(f"Error serving image: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/select-folder', methods=['POST'])
+def select_folder():
+    try:
+        # Create a root window but hide it
+        root = Tk()
+        root.withdraw()
+
+        # Increase timeout and handle dialog asynchronously
+        root.after(100, lambda: root.focus_force())
+        folder_path = filedialog.askdirectory(parent=root)
+        root.destroy()
+
+        if not folder_path:
+            return jsonify({'success': False, 'error': 'No folder selected'})
+
+        # Convert to absolute path and normalize
+        folder_path = os.path.abspath(folder_path)
+
+        # Ensure the folder exists
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+
+        # Update the environment variable and config
+        os.environ['IMAGES_FOLDER'] = folder_path
+        Config.set_env('IMAGES_FOLDER', folder_path)
+
+        # Log the successful folder selection
+        logger.info(f"Selected folder path: {folder_path}")
+
+        return jsonify({
+            'success': True,
+            'folderPath': folder_path
+        })
+
+    except Exception as e:
+        logger.error(f"Error selecting folder: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/generate-prompt', methods=['POST'])

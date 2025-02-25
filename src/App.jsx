@@ -23,7 +23,7 @@ const getTheme = (mode) => createTheme({
 // Configure axios
 const api = axios.create({
   baseURL: '',  // Empty baseURL to use relative paths with proxy
-  timeout: 30000,
+  timeout: 60000,  // Increased timeout to 60 seconds
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -39,6 +39,7 @@ function App() {
   const [mode, setMode] = useState('dark')
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [tvIp, setTvIp] = useState(localStorage.getItem('tvIp') || '')
+  const [imageFolder, setImageFolder] = useState(localStorage.getItem('imageFolder') || '')
 
   const theme = getTheme(mode)
 
@@ -56,7 +57,33 @@ function App() {
 
   const handleTvIpSave = () => {
     localStorage.setItem('tvIp', tvIp)
+    localStorage.setItem('imageFolder', imageFolder)
     setSettingsOpen(false)
+  }
+
+  const handleFolderSelect = async () => {
+    try {
+      setLoading(true)
+      setStatus('Opening folder selection dialog...')
+      const response = await api.post('/api/select-folder', null, {
+        timeout: 120000 // Increase timeout to 2 minutes for folder selection
+      })
+      if (response.data.success) {
+        setImageFolder(response.data.folderPath)
+        localStorage.setItem('imageFolder', response.data.folderPath)
+        setStatus('Folder selected successfully!')
+        window.location.reload() // Reload to refresh the image gallery
+      } else {
+        throw new Error(response.data.error || 'Failed to select folder')
+      }
+    } catch (error) {
+      const errorMessage = error.code === 'ECONNABORTED' 
+        ? 'Folder selection timed out. Please try again.'
+        : error.response?.data?.error || error.message || 'Failed to select folder'
+      setStatus(`Error: ${errorMessage}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleError = (error) => {
