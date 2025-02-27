@@ -9,6 +9,7 @@ from image_generator import generate_image_api
 from image_fetcher import fetch_image
 from tv_pusher import push_image_to_tv
 from prompt_generator import PromptGenerator
+from samsungtvws import SamsungTVWS
 
 app = Flask(__name__)
 # Allow all origins for development
@@ -62,6 +63,8 @@ def select_folder():
     except Exception as e:
         logger.error(f"Error selecting folder: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
 
 @app.route('/api/generate-prompt', methods=['POST'])
 def generate_prompt():
@@ -123,6 +126,27 @@ def list_local_images():
 
     except Exception as e:
         logger.error(f"Error listing local images: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/test-tv-connection', methods=['POST'])
+def test_tv_connection():
+    try:
+        data = request.get_json()
+        tv_ip = data.get('tvIp')
+        
+        if not tv_ip:
+            return jsonify({'success': False, 'error': 'TV IP address is required'}), 400
+
+        from tv_test import test_tv_connection as test_tv
+        success = test_tv(tv_ip)
+        
+        if success:
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'Failed to connect to TV'}), 400
+
+    except Exception as e:
+        logger.error(f"Error testing TV connection: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/push-to-tv', methods=['POST'])

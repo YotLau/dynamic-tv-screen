@@ -23,6 +23,7 @@ const DirectoryPicker = ({ onDirectorySelect }) => {
       const directoryHandle = await window.showDirectoryPicker();
       const directoryPath = directoryHandle.name;
       
+      // Store the selected directory path
       localStorage.setItem('imageFolder', directoryPath);
       setSelectedDirectory(directoryPath);
       

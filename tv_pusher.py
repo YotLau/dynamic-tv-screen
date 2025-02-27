@@ -10,6 +10,11 @@ def push_image_to_tv(image_path, tv_ip):
         if not image_path:
             raise ValueError("Image path is required")
 
+        # Test TV connection first
+        from tv_test import test_tv_connection
+        if not test_tv_connection(tv_ip):
+            raise ConnectionError("Failed to establish connection with TV. Please check the TV IP address and network connectivity.")
+
         print(f"Initializing TV connection to {tv_ip}...")
         tv = SamsungTVWS(host=tv_ip, port=8002)  # Added explicit port
         
