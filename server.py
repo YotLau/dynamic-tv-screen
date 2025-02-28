@@ -128,6 +128,35 @@ def list_local_images():
         logger.error(f"Error listing local images: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/api/check-tv-ip', methods=['POST'])
+def check_tv_ip():
+    try:
+        data = request.get_json()
+        tv_ip = data.get('tvIp')
+        
+        if not tv_ip:
+            return jsonify({'success': False, 'error': 'TV IP address is required'}), 400
+
+        # Use the same approach as in tv_test.py
+        logger.info(f"Attempting to connect to TV at {tv_ip}...")
+        
+        # Import the test_tv_connection function from tv_test.py
+        from tv_test import test_tv_connection
+        
+        # Use the proper connection test function
+        connection_successful = test_tv_connection(tv_ip)
+        
+        if connection_successful:
+            logger.info(f"Successfully connected to TV at {tv_ip}")
+            return jsonify({'success': True})
+        else:
+            logger.error(f"Failed to connect to TV at {tv_ip}")
+            return jsonify({'success': False, 'error': 'Failed to connect to TV'}), 400
+
+    except Exception as e:
+        logger.error(f"Error checking TV IP: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/api/test-tv-connection', methods=['POST'])
 def test_tv_connection():
     try:
