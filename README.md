@@ -11,11 +11,14 @@ Transform your Samsung Frame TV into an AI-powered art gallery. This application
 - 📁 Local image management
 - ⚡ Multiple AI model fallbacks
 - 🎯 Customizable negative prompts
+- 🌐 Web interface for configuration and control
+- 📱 Android app support (in development)
 
 ## Prerequisites
 
 - Samsung Frame TV
 - Python 3.8+
+- Node.js and npm (for web interface)
 - API keys for:
   - Ideogram AI
   - OpenRouter (Gemini AI)
@@ -26,16 +29,22 @@ Transform your Samsung Frame TV into an AI-powered art gallery. This application
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/dynamic-tv-screen.git
+cd dynamic-tv-screen
 
 # Create and activate virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+venv\Scripts\activate  # On Windows
+# source venv/bin/activate  # On Unix/MacOS
 
-# Install dependencies
+# Install Python dependencies
 pip install -r requirements.txt
 
+# Install frontend dependencies
+npm install
+
 # Set up environment variables
-cp .env.example .env
+copy .env.example .env  # On Windows
+# cp .env.example .env  # On Unix/MacOS
 ```
 
 ## Configuration

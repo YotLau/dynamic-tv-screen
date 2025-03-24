@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Box, Container, Typography, Button, TextField, Paper, LinearProgress, Stack, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, CircularProgress } from '@mui/material'
+import { Box, Container, Typography, Button, TextField, Paper, LinearProgress, Stack, IconButton, Snackbar, Alert, CircularProgress } from '@mui/material'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import Brightness4Icon from '@mui/icons-material/Brightness4'
 import Brightness7Icon from '@mui/icons-material/Brightness7'
 import SettingsIcon from '@mui/icons-material/Settings'
+import { useNavigate } from 'react-router-dom'
 import ImageGallery from './components/ImageGallery'
 import axios from 'axios'
 
@@ -37,9 +38,9 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [imageUrl, setImageUrl] = useState(null)
   const [mode, setMode] = useState('dark')
-  const [settingsOpen, setSettingsOpen] = useState(false)
   const [tvIp, setTvIp] = useState(localStorage.getItem('tvIp') || '')
   const [imageFolder, setImageFolder] = useState(localStorage.getItem('imageFolder') || '')
+  const navigate = useNavigate()
 
   const theme = getTheme(mode)
 
@@ -48,17 +49,7 @@ function App() {
   }
 
   const handleSettingsOpen = () => {
-    setSettingsOpen(true)
-  }
-
-  const handleSettingsClose = () => {
-    setSettingsOpen(false)
-  }
-
-  const handleTvIpSave = () => {
-    localStorage.setItem('tvIp', tvIp)
-    localStorage.setItem('imageFolder', imageFolder)
-    setSettingsOpen(false)
+    navigate('/settings')
   }
 
   const handleFolderSelect = async () => {
@@ -183,25 +174,7 @@ function App() {
             </Box>
           </Box>
 
-          <Dialog open={settingsOpen} onClose={handleSettingsClose}>
-            <DialogTitle>Settings</DialogTitle>
-            <DialogContent>
-              <TextField
-                autoFocus
-                margin="dense"
-                label="TV IP Address"
-                type="text"
-                fullWidth
-                value={tvIp}
-                onChange={(e) => setTvIp(e.target.value)}
-                helperText="Enter your Samsung TV's local IP address"
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleSettingsClose}>Cancel</Button>
-              <Button onClick={handleTvIpSave} variant="contained">Save</Button>
-            </DialogActions>
-          </Dialog>
+
 
           <Paper sx={{ p: 3, mb: 3 }}>
             <Stack spacing={2}>
