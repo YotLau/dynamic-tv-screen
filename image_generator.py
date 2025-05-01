@@ -31,26 +31,23 @@ def generate_image_api(prompt):
             
         logger.info(f"Using prompt: {prompt}")
         
-        # Prepare request payload
-        payload = {
-            "image_request": {
-                "prompt": prompt,
-                "model": os.getenv('IDEOGRAM_MODEL', 'xl-v2'),
-                "magic_prompt_option": "AUTO",
-                "negative_prompt": os.getenv('NEGATIVE_PROMPT', NEGATIVE_PROMPT),
-                "style_type": os.getenv('IDEOGRAM_STYLE_TYPE', 'CREATIVE'),
-                "aspect_ratio": os.getenv('IDEOGRAM_ASPECT_RATIO', '1:1')
-            }
+        # Prepare request payload as files
+        files_payload = {
+            'prompt': (None, prompt),
+            'magic_prompt': (None, "AUTO"),
+            'negative_prompt': (None, os.getenv('NEGATIVE_PROMPT', NEGATIVE_PROMPT)),
+            'style_type': (None, os.getenv('IDEOGRAM_STYLE_TYPE', 'AUTO')),
+            'aspect_ratio': (None, os.getenv('IDEOGRAM_ASPECT_RATIO', '16x9'))
         }
 
         logger.info("Making request to Ideogram API")
         response = requests.post(
-            "https://api.ideogram.ai/generate",
+            "https://api.ideogram.ai/v1/ideogram-v3/generate",
             headers={
-                "Api-Key": api_key,
-                "Content-Type": "application/json"
+                "Api-Key": api_key
+                # Content-Type is automatically set to multipart/form-data by requests when using 'files'
             },
-            json=payload
+            files=files_payload
         )
 
         # Log the response status

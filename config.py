@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
-    REQUIRED_VARS = ['IDEOGRAM_API_KEY', 'IDEOGRAM_MODEL', 'IDEOGRAM_STYLE_TYPE', 'IDEOGRAM_ASPECT_RATIO', 'NEGATIVE_PROMPT', 'IMAGES_FOLDER']
+    REQUIRED_VARS = ['IDEOGRAM_API_KEY', 'IDEOGRAM_STYLE_TYPE', 'IDEOGRAM_ASPECT_RATIO', 'NEGATIVE_PROMPT', 'IMAGES_FOLDER']
     
     @staticmethod
     def validate_env():
