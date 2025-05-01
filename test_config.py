@@ -20,7 +20,6 @@ class TestConfig(unittest.TestCase):
         # Test when all required environment variables are present
         test_values = {
             'IDEOGRAM_API_KEY': 'test_key',
-            'IDEOGRAM_MODEL': 'test_model',
             'IDEOGRAM_STYLE_TYPE': 'test_style',
             'IDEOGRAM_ASPECT_RATIO': '1:1',
             'NEGATIVE_PROMPT': 'test_negative',
